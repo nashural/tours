@@ -1,7 +1,9 @@
+import { EMAIL_IN_USE, PASSWORD_MISMATCH, TOKEN_EXPIRED, TOKEN_MISMATCH, USER_NOT_FOUND, findError, issetError } from '../api/errors'
 import { FC, useState } from "react";
-import { Form, Formik, FormikProps } from "formik";
-import { FormGroup, Input, Label } from "reactstrap";
+import { Form, Formik, FormikHelpers, FormikProps } from "formik";
+import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
 
+import { APIError } from '../api/types';
 import { Link } from "react-router-dom";
 import { LoadingButton } from "../components/LoadingButton";
 import { LoginForm } from "../types";
@@ -18,29 +20,25 @@ export const Login: FC<{}> = () => {
   const apiClient = useApiClient();
   const accessTokenStorage = useAccessTokenStorage();
   const refreshTokenStorage = useRefreshTokenStorage();
-  const [isSaving, setIsSaving] = useState(false);
+  const [serverErrors, setServerErrors] = useState<APIError[]>([]);
 
-  const handleSubmit = async (values: LoginForm) => {
-    setIsSaving(true);
-    try {
-      // @ts-expect-error TS2339
-      const { error, accessToken, refreshToken } = await apiClient.login(
-        values
-      );
-      if (error) {
-      } else {
-        accessTokenStorage.setToken(accessToken);
-        refreshTokenStorage.setToken(refreshToken);
-        window.location.href = "/";
-      }
-    } finally {
-      setIsSaving(false);
+  const handleSubmit = async (values: LoginForm, { setErrors }: FormikHelpers<LoginForm>) => {
+    // @ts-expect-error TS2339
+    const { errors, accessToken, refreshToken } = await apiClient.login(
+      values
+    );
+    if (errors) {
+      setServerErrors(errors)
+    } else {
+      accessTokenStorage.setToken(accessToken);
+      refreshTokenStorage.setToken(refreshToken);
+      window.location.href = "/";
     }
   };
 
   return (
     <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-      {({ values, handleChange, handleBlur }: FormikProps<LoginForm>) => {
+      {({ values, errors, isSubmitting, handleChange, handleBlur }: FormikProps<LoginForm>) => {
         return (
           <Form>
             <FormGroup>
@@ -53,10 +51,14 @@ export const Login: FC<{}> = () => {
                 type="email"
                 name="email"
                 value={values.email}
-                disabled={isSaving}
+                disabled={isSubmitting}
+                invalid={issetError(serverErrors, USER_NOT_FOUND)}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
+              {issetError(serverErrors, USER_NOT_FOUND) && (
+                <FormFeedback>{findError(serverErrors, USER_NOT_FOUND)?.title}</FormFeedback>
+              )}
             </FormGroup>
             <FormGroup>
               <Label htmlFor="password">Пароль</Label>
@@ -65,15 +67,19 @@ export const Login: FC<{}> = () => {
                 type="password"
                 name="password"
                 value={values.password}
-                disabled={isSaving}
+                disabled={isSubmitting}
+                invalid={issetError(serverErrors, PASSWORD_MISMATCH)}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
+              {issetError(serverErrors, PASSWORD_MISMATCH) && (
+                <FormFeedback>{findError(serverErrors, PASSWORD_MISMATCH)?.title}</FormFeedback>
+              )}
             </FormGroup>
-            <FormGroup>
+            <FormGroup style={{ marginTop: '10px' }}>
               <LoadingButton
-                loading={isSaving}
-                disabled={isSaving}
+                loading={isSubmitting}
+                disabled={isSubmitting}
                 block
                 color="primary"
               >

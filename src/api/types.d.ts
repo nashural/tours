@@ -1,3 +1,9 @@
+interface APIError {
+  id: string
+  code: string
+  title: string
+}
+
 export type LoginResult = LoginSuccess | LoginFail;
 
 export interface LoginSuccess {
@@ -6,7 +12,7 @@ export interface LoginSuccess {
 }
 
 export interface LoginFail {
-  error: string;
+  errors: APIError[];
 }
 
 export interface Guide {
