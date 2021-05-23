@@ -1,7 +1,7 @@
-import { EMAIL_IN_USE, PASSWORD_MISMATCH, TOKEN_EXPIRED, TOKEN_MISMATCH, USER_NOT_FOUND, findError, issetError } from '../api/errors'
 import { FC, useState } from "react";
 import { Form, Formik, FormikHelpers, FormikProps } from "formik";
 import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
+import { PASSWORD_MISMATCH, USER_NOT_FOUND, findError, issetError } from '../api/errors'
 
 import { APIError } from '../api/types';
 import { Link } from "react-router-dom";
