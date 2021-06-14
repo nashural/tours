@@ -5,6 +5,7 @@ export const USER_NOT_FOUND = 'user-not-found';
 export const EMAIL_IN_USE = 'email-in-use';
 export const TOKEN_MISMATCH = 'token-mismatch';
 export const TOKEN_EXPIRED = 'token-expired';
+export const NOT_EQUAL_PASSWORDS = 'not-equal-passwords';
 
 export const issetError = (errors: APIError[], errorCode: string): boolean => {
   for (let { code } of errors) {

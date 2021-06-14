@@ -6,6 +6,13 @@ export interface LoginForm {
   password: string;
 }
 
+export interface RegisterForm {
+  name: string
+  email: string
+  password: string
+  password2: string
+}
+
 export interface TourForm {
   id: string;
   name: string;

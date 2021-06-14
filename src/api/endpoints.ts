@@ -1,5 +1,6 @@
 export const getToursAPIEndpoint = () => {
-  return "http://api.tours.nashural.ru";
+  return "http://localhost:3001"
+  // return "http://api.tours.nashural.ru";
 };
 
 export const getDadataSuggestionsEndpoint = () => {

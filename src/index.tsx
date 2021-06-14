@@ -1,26 +1,28 @@
-import { StrictMode } from "react";
-import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
-import { Switch, Route, Redirect } from "react-router";
-import { Container } from "reactstrap";
-import { TokenStoragesProvider } from "./providers/TokenStoragesProvider";
-import { ApiClientProvider } from "./providers/ApiClientProvider";
-import { createApiClient } from "./api/createApiClient";
-import { CheckAuthentication } from "./components/CheckAuthentication";
-import { TopBar } from "./components/TopBar";
-import { Main } from "./pages/Main";
-import { Guides } from "./pages/Guides";
-import { Tours } from "./pages/Tours";
-import { AddTour } from "./pages/AddTour";
-import { AddGuide } from "./pages/AddGuide";
-import { EditGuide } from "./pages/EditGuide";
-import { EditTour } from "./pages/EditTour";
-import { LoginLayout } from "./components/LoginLayout";
-import { Login } from "./pages/Login";
-
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-bootstrap-typeahead/css/Typeahead.css";
+
+import { Redirect, Route, Switch } from "react-router";
+
+import { AddGuide } from "./pages/AddGuide";
+import { AddTour } from "./pages/AddTour";
+import { ApiClientProvider } from "./providers/ApiClientProvider";
+import { BrowserRouter } from "react-router-dom";
+import { CheckAuthentication } from "./components/CheckAuthentication";
+import { Container } from "reactstrap";
+import { EditGuide } from "./pages/EditGuide";
+import { EditTour } from "./pages/EditTour";
+import { Guides } from "./pages/Guides";
+import { Login } from "./pages/Login";
+import { LoginLayout } from "./components/LoginLayout";
+import { Main } from "./pages/Main";
+import ReactDOM from "react-dom";
+import { Register } from './pages/Register'
+import { StrictMode } from "react";
 import { TokenStorage } from "./classes/TokenStorage";
+import { TokenStoragesProvider } from "./providers/TokenStoragesProvider";
+import { TopBar } from "./components/TopBar";
+import { Tours } from "./pages/Tours";
+import { createApiClient } from "./api/createApiClient";
 
 const accessTokenStorage = new TokenStorage("accessToken");
 const refreshTokenStorage = new TokenStorage("refreshToken");
@@ -58,6 +60,7 @@ ReactDOM.render(
                   <LoginLayout>
                     <Switch>
                       <Route exact path="/login" component={Login} />
+                      <Route exact path="/register" component={Register} />
                       <Redirect from="*" to="/login" />
                     </Switch>
                   </LoginLayout>

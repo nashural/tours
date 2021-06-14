@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Form, Formik, FormikHelpers, FormikProps } from "formik";
+import { Form, Formik, FormikProps } from "formik";
 import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
 import { PASSWORD_MISMATCH, USER_NOT_FOUND, findError, issetError } from '../api/errors'
 
@@ -22,7 +22,7 @@ export const Login: FC<{}> = () => {
   const refreshTokenStorage = useRefreshTokenStorage();
   const [serverErrors, setServerErrors] = useState<APIError[]>([]);
 
-  const handleSubmit = async (values: LoginForm, { setErrors }: FormikHelpers<LoginForm>) => {
+  const handleSubmit = async (values: LoginForm) => {
     // @ts-expect-error TS2339
     const { errors, accessToken, refreshToken } = await apiClient.login(
       values
@@ -37,8 +37,8 @@ export const Login: FC<{}> = () => {
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-      {({ values, errors, isSubmitting, handleChange, handleBlur }: FormikProps<LoginForm>) => {
+    <Formik initialValues={initialValues} isInitialValid={false} onSubmit={handleSubmit}>
+      {({ values, isSubmitting, isValid, handleChange, handleBlur }: FormikProps<LoginForm>) => {
         return (
           <Form>
             <FormGroup>
@@ -78,9 +78,9 @@ export const Login: FC<{}> = () => {
             </FormGroup>
             <FormGroup style={{ marginTop: '10px' }}>
               <LoadingButton
-                loading={isSubmitting}
-                disabled={isSubmitting}
                 block
+                loading={isSubmitting}
+                disabled={isSubmitting || !isValid}
                 color="primary"
               >
                 Войти

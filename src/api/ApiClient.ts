@@ -2,10 +2,10 @@ import {
   DadataSuggestion,
   FindCategoriesByQueryResult,
   FindPostsByQueryResult,
-  FindTagsByQueryResult
+  FindTagsByQueryResult,
 } from "./types";
-import { Guide, LoginResult, Tour } from "./types";
-import { GuideForm, InlineGuideForm, LoginForm } from "../types";
+import { Guide, LoginResult, RegisterResult, Tour } from "./types";
+import { GuideForm, InlineGuideForm, LoginForm, RegisterForm } from "../types";
 import {
   getAmazonEndpoint,
   getDadataSuggestionsEndpoint,
@@ -35,6 +35,20 @@ export class ApiClient {
 
   async login(form: LoginForm): Promise<LoginResult> {
     const resp = await fetch(`${getToursAPIEndpoint()}/auth/login`, {
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify(form)
+    });
+    return resp.json();
+  }
+
+  async register(form: RegisterForm): Promise<RegisterResult> {
+    const resp = await fetch(`${getToursAPIEndpoint()}/auth/register`, {
       method: "POST",
       mode: "cors",
       credentials: "omit",

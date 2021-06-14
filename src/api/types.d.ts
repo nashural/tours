@@ -15,6 +15,17 @@ export interface LoginFail {
   errors: APIError[];
 }
 
+export type RegisterResult = RegisterSuccess | RegisterFail
+
+export interface RegisterSuccess {
+  accessToken: string
+  refreshToken: string
+}
+
+export interface RegisterFail {
+  errors: APIError[]
+}
+
 export interface Guide {
   id: string;
   name: string;
