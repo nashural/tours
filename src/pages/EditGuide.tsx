@@ -7,47 +7,36 @@ import {
   Label,
   Spinner
 } from "reactstrap";
-import { FC, useEffect, useState } from "react";
-import { Form, Formik, FormikErrors, FormikProps } from "formik";
+import { Form, Formik, FormikProps } from "formik";
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 
 import { Bullseye } from "../components/Bullseye";
+import { FC } from "react";
 import { GuideForm } from "../types";
 import { Link } from "react-router-dom";
 import { LoadingButton } from "../components/LoadingButton";
 import { useApiClient } from "../hooks/useApiClient";
 import { useParams } from "react-router-dom";
-
-const validate = (values: GuideForm) => {
-  const errors: FormikErrors<GuideForm> = {};
-
-  return errors;
-};
+import { validate } from './AddGuide'
 
 export const EditGuide: FC<{}> = () => {
   const apiClient = useApiClient();
-  const { id } = useParams<{id: string}>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [initialValues, setInitialValues] = useState<GuideForm>();
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient()
+  const { isLoading, data: initialValues } = useQuery(['guides', id], () => {
+    return apiClient.getGuideById(id)
+  })
+  const { isLoading: isSaving, mutate } = useMutation((values: GuideForm) => {
+    return apiClient.updateGuideById(values.id, values)
+  }, {
+    onSuccess() {
+      queryClient.invalidateQueries(['guides'])
+    }
+  })
 
   const handleSubmit = async (values: GuideForm) => {
-    try {
-      setIsSaving(true);
-      const guide = await apiClient.updateGuideById(values.id, values);
-      setInitialValues(guide);
-    } finally {
-      setIsSaving(false);
-    }
+    await mutate(values)
   };
-
-  useEffect(() => {
-    apiClient
-      .getGuideById(id)
-      .then(setInitialValues)
-      .then(() => {
-        setIsLoading(false);
-      });
-  }, [apiClient, id]);
 
   if (isLoading) {
     return (
@@ -58,6 +47,8 @@ export const EditGuide: FC<{}> = () => {
   }
 
   if (initialValues) {
+    const initialErrors = validate(initialValues)
+
     return (
       <>
         <Breadcrumb>
@@ -69,14 +60,13 @@ export const EditGuide: FC<{}> = () => {
         <Formik
           enableReinitialize
           initialValues={initialValues}
-          initialErrors={validate(initialValues)}
+          initialErrors={initialErrors}
           validate={validate}
           onSubmit={handleSubmit}
         >
           {({
             values,
             errors,
-            setFieldValue,
             handleChange,
             handleBlur,
             isValid

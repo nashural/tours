@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 
+import { QueryClient, QueryClientProvider } from 'react-query'
 import { Redirect, Route, Switch } from "react-router";
 
 import { AddGuide } from "./pages/AddGuide";
@@ -27,50 +28,53 @@ import { createApiClient } from "./api/createApiClient";
 const accessTokenStorage = new TokenStorage("accessToken");
 const refreshTokenStorage = new TokenStorage("refreshToken");
 const apiClient = createApiClient(accessTokenStorage, refreshTokenStorage);
+const queryClient = new QueryClient()
 
 ReactDOM.render(
   <StrictMode>
-    <TokenStoragesProvider
-      accessTokenStorage={accessTokenStorage}
-      refreshTokenStorage={refreshTokenStorage}
-    >
-      <ApiClientProvider apiClient={apiClient}>
-        <BrowserRouter>
-          <CheckAuthentication>
-            {(isAuthenticated) => {
-              if (isAuthenticated) {
-                return (
-                  <>
-                    <TopBar />
-                    <Container>
+    <QueryClientProvider client={queryClient}>
+      <TokenStoragesProvider
+        accessTokenStorage={accessTokenStorage}
+        refreshTokenStorage={refreshTokenStorage}
+      >
+        <ApiClientProvider apiClient={apiClient}>
+          <BrowserRouter>
+            <CheckAuthentication>
+              {(isAuthenticated) => {
+                if (isAuthenticated) {
+                  return (
+                    <>
+                      <TopBar />
+                      <Container>
+                        <Switch>
+                          <Route exact path="/" component={Main} />
+                          <Route exact path="/guides" component={Guides} />
+                          <Route exact path="/guides/add" component={AddGuide} />
+                          <Route exact path="/guides/:id" component={EditGuide} />
+                          <Route exact path="/tours" component={Tours} />
+                          <Route exact path="/tours/add" component={AddTour} />
+                          <Route exact path="/tours/:id" component={EditTour} />
+                        </Switch>
+                      </Container>
+                    </>
+                  );
+                } else {
+                  return (
+                    <LoginLayout>
                       <Switch>
-                        <Route exact path="/" component={Main} />
-                        <Route exact path="/guides" component={Guides} />
-                        <Route exact path="/guides/add" component={AddGuide} />
-                        <Route exact path="/guides/:id" component={EditGuide} />
-                        <Route exact path="/tours" component={Tours} />
-                        <Route exact path="/tours/add" component={AddTour} />
-                        <Route exact path="/tours/:id" component={EditTour} />
+                        <Route exact path="/login" component={Login} />
+                        <Route exact path="/register" component={Register} />
+                        <Redirect from="*" to="/login" />
                       </Switch>
-                    </Container>
-                  </>
-                );
-              } else {
-                return (
-                  <LoginLayout>
-                    <Switch>
-                      <Route exact path="/login" component={Login} />
-                      <Route exact path="/register" component={Register} />
-                      <Redirect from="*" to="/login" />
-                    </Switch>
-                  </LoginLayout>
-                );
-              }
-            }}
-          </CheckAuthentication>
-        </BrowserRouter>
-      </ApiClientProvider>
-    </TokenStoragesProvider>
+                    </LoginLayout>
+                  );
+                }
+              }}
+            </CheckAuthentication>
+          </BrowserRouter>
+        </ApiClientProvider>
+      </TokenStoragesProvider>
+    </QueryClientProvider>
   </StrictMode>,
   document.getElementById("root")
 );

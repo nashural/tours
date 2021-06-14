@@ -1,49 +1,51 @@
-import { FC, useState, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  Jumbotron,
   Button,
+  Jumbotron,
   Spinner
 } from "reactstrap";
-import { Link } from "react-router-dom";
-import { useApiClient } from "../../hooks/useApiClient";
+import { Link, useHistory } from "react-router-dom";
+
+import { Bullseye } from "../../components/Bullseye";
+import { FC } from "react";
 import { Guide } from "../../api/types";
 import { GuidesList } from "./GuidesList";
-import { Bullseye } from "../../components/Bullseye";
+import { Toolbar } from '../../components/Toolbar'
+import { useApiClient } from "../../hooks/useApiClient";
+import { useQuery } from 'react-query'
 
 export const Guides: FC<{}> = () => {
   const apiClient = useApiClient();
-  const [isLoading, setIsLoading] = useState(true);
-  const [guides, setGuides] = useState<Guide[]>([]);
+  const { data: guides, isLoading } = useQuery('guides', () => apiClient.getGuides())
+  const history = useHistory()
 
-  useEffect(() => {
-    apiClient
-      .getGuides()
-      .then(setGuides)
-      .then(() => {
-        setIsLoading(false);
-      });
-  }, [apiClient]);
+  const handleAddGuide = () => {
+    history.push('/guides/add')
+  }
 
   return (
     <>
       <Breadcrumb>
         <BreadcrumbItem active>Гиды</BreadcrumbItem>
       </Breadcrumb>
+      <Toolbar>
+        <Button disabled={isLoading} onClick={handleAddGuide}>Добавить гида</Button>
+      </Toolbar>
+      <hr />
       {isLoading && (
         <Bullseye>
           <Spinner />
         </Bullseye>
       )}
-      {!isLoading && guides.length === 0 && (
+      {!isLoading && (guides as Guide[]).length === 0 && (
         <Jumbotron>
           <Button color="primary" tag={Link} to="/guides/add">
             Добавить гида
           </Button>
         </Jumbotron>
       )}
-      {!isLoading && guides.length !== 0 && <GuidesList guides={guides} />}
+      {!isLoading && (guides as Guide[]).length !== 0 && <GuidesList guides={guides as Guide[]} />}
     </>
   );
 };

@@ -6,8 +6,9 @@ import {
   Input,
   Label
 } from "reactstrap";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { Form, Formik, FormikErrors, FormikProps } from "formik";
+import { useMutation, useQueryClient } from "react-query";
 
 import { GuideForm } from "../types";
 import { Link } from "react-router-dom";
@@ -15,23 +16,32 @@ import { LoadingButton } from "../components/LoadingButton";
 import { nanoid } from "nanoid";
 import { useApiClient } from "../hooks/useApiClient";
 
-const validate = (values: GuideForm) => {
+export const validate = (values: GuideForm) => {
   const errors: FormikErrors<GuideForm> = {};
+
+  if (values.name.length === 0) {
+    errors.name = "Введите имя гида"
+  } else
+    if (values.description.length === 0) {
+      errors.description = 'Введите биографию гида'
+    }
 
   return errors;
 };
 
 export const AddGuide: FC<{}> = () => {
   const apiClient = useApiClient();
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const queryClient = useQueryClient()
+  const { isLoading: isSaving, mutate } = useMutation((values: GuideForm) => {
+    return apiClient.createGuide(values)
+  }, {
+    onSuccess() {
+      queryClient.invalidateQueries(['guides'])
+    }
+  })
 
   const handleSubmit = async (values: GuideForm) => {
-    try {
-      setIsSaving(true);
-      await apiClient.createGuide(values);
-    } finally {
-      setIsSaving(false);
-    }
+    await mutate(values)
   };
 
   const initialValues: GuideForm = useMemo(() => {
