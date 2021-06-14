@@ -8,10 +8,10 @@ import {
 } from "reactstrap";
 import { FC, useMemo } from "react";
 import { Form, Formik, FormikErrors, FormikProps } from "formik";
+import { Link, useHistory } from "react-router-dom";
 import { useMutation, useQueryClient } from "react-query";
 
 import { GuideForm } from "../types";
-import { Link } from "react-router-dom";
 import { LoadingButton } from "../components/LoadingButton";
 import { nanoid } from "nanoid";
 import { useApiClient } from "../hooks/useApiClient";
@@ -32,9 +32,13 @@ export const validate = (values: GuideForm) => {
 export const AddGuide: FC<{}> = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient()
+  const history = useHistory()
   const { isLoading: isSaving, mutate } = useMutation((values: GuideForm) => {
     return apiClient.createGuide(values)
   }, {
+    onMutate(variables) {
+      queryClient.setQueryData(['guides', variables.id], variables)
+    },
     onSuccess() {
       queryClient.invalidateQueries(['guides'])
     }
@@ -42,6 +46,7 @@ export const AddGuide: FC<{}> = () => {
 
   const handleSubmit = async (values: GuideForm) => {
     await mutate(values)
+    history.push(`/guides/${values.id}`)
   };
 
   const initialValues: GuideForm = useMemo(() => {
@@ -111,7 +116,7 @@ export const AddGuide: FC<{}> = () => {
                   loading={isSaving}
                   disabled={!isValid || isSaving}
                 >
-                  Сохранить гида
+                  Добавить гида
                 </LoadingButton>
               </FormGroup>
             </Form>
