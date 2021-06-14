@@ -40,7 +40,7 @@ export const AddGuide: FC<{}> = () => {
       queryClient.setQueryData(['guides', variables.id], variables)
     },
     onSuccess() {
-      queryClient.invalidateQueries(['guides'])
+      queryClient.invalidateQueries('guides')
     }
   })
 

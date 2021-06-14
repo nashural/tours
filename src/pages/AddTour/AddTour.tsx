@@ -1,9 +1,10 @@
 import { Breadcrumb, BreadcrumbItem, FormGroup } from "reactstrap";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { Form, Formik, FormikProps } from "formik";
+import { Link, useHistory } from "react-router-dom";
+import { useMutation, useQueryClient } from "react-query";
 
 import { GuideSection } from "./GuideSection";
-import { Link } from "react-router-dom";
 import { LoadingButton } from "../../components/LoadingButton";
 import { MainSection } from "./MainSection";
 import { PickpointSection } from "./PickpointSection";
@@ -15,14 +16,22 @@ import { validate } from "./validate";
 
 export const AddTour: FC<{}> = () => {
   const apiClient = useApiClient();
-  const [isSaving, setIsSaving] = useState(false);
-  const handleSubmit = async (values: TourForm) => {
-    setIsSaving(true);
-    try {
-      await apiClient.createTour(values);
-    } finally {
-      setIsSaving(false);
+  const queryClient = useQueryClient()
+  const history = useHistory()
+  const { isLoading: isSaving, mutate } = useMutation((values: TourForm) => {
+    return apiClient.createTour(values)
+  }, {
+    onMutate(variables) {
+      queryClient.setQueryData(['tours', variables.id], variables)
+    },
+    onSuccess() {
+      queryClient.invalidateQueries('tours')
     }
+  })
+
+  const handleSubmit = async (values: TourForm) => {
+    await mutate(values)
+    history.push(`/tours/${values.id}`)
   };
 
   const initialValues: TourForm = useMemo(() => {

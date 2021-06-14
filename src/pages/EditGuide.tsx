@@ -30,7 +30,7 @@ export const EditGuide: FC<{}> = () => {
     return apiClient.updateGuideById(values.id, values)
   }, {
     onSuccess() {
-      queryClient.invalidateQueries(['guides'])
+      queryClient.invalidateQueries('guides')
     }
   })
 

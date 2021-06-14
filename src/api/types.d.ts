@@ -1,7 +1,7 @@
 interface APIError {
-  id: string
-  code: string
-  title: string
+  id: string;
+  code: string;
+  title: string;
 }
 
 export type LoginResult = LoginSuccess | LoginFail;
@@ -15,15 +15,15 @@ export interface LoginFail {
   errors: APIError[];
 }
 
-export type RegisterResult = RegisterSuccess | RegisterFail
+export type RegisterResult = RegisterSuccess | RegisterFail;
 
 export interface RegisterSuccess {
-  accessToken: string
-  refreshToken: string
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RegisterFail {
-  errors: APIError[]
+  errors: APIError[];
 }
 
 export interface Guide {
@@ -44,6 +44,7 @@ export interface Tour {
   guide: string;
   pickpoint: Pickpoint;
   placement: Placement;
+  phone: string;
 }
 
 export interface Pickpoint {

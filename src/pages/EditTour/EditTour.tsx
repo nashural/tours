@@ -1,8 +1,9 @@
 import { Breadcrumb, BreadcrumbItem, FormGroup, Spinner } from "reactstrap";
-import { FC, useEffect, useState } from "react";
 import { Form, Formik, FormikProps } from "formik";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { Bullseye } from "../../components/Bullseye";
+import { FC } from "react";
 import { GuideSection } from "../AddTour/GuideSection";
 import { Link } from "react-router-dom";
 import { LoadingButton } from "../../components/LoadingButton";
@@ -16,31 +17,19 @@ import { validate } from "../AddTour/validate";
 
 export const EditTour: FC<{}> = () => {
   const apiClient = useApiClient();
-  const { id } = useParams<{id: string}>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [initialValues, setInitialValues] = useState<TourForm>();
-
-  useEffect(() => {
-    setIsLoading(true);
-    apiClient
-      .getTourById(id)
-      .then((tour) => {
-        setInitialValues(tour as TourForm)
-      })
-      .then(() => {
-        setIsLoading(false);
-      });
-  }, [apiClient, id]);
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient()
+  const { isLoading, data: initialValues } = useQuery(['tours', id], () => apiClient.getTourById(id))
+  const { isLoading: isSaving, mutate } = useMutation((values: TourForm) => {
+    return apiClient.updateTourById(values.id, values)
+  }, {
+    onSuccess() {
+      queryClient.invalidateQueries('tours')
+    }
+  })
 
   const handleSubmit = async (values: TourForm) => {
-    try {
-      setIsSaving(true);
-      const tour = await apiClient.updateTourById(values.id, values);
-      setInitialValues(tour as TourForm);
-    } finally {
-      setIsSaving(false);
-    }
+    await mutate(values)
   };
 
   if (isLoading) {
@@ -61,7 +50,9 @@ export const EditTour: FC<{}> = () => {
           <BreadcrumbItem active>{initialValues.name}</BreadcrumbItem>
         </Breadcrumb>
         <Formik
+          // @ts-expect-error TS2322
           initialValues={initialValues}
+          // @ts-expect-error TS2345
           initialErrors={validate(initialValues)}
           validate={validate}
           onSubmit={handleSubmit}

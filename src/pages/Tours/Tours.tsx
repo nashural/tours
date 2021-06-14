@@ -1,42 +1,44 @@
-import { FC, useState, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  Jumbotron,
   Button,
+  Jumbotron,
   Spinner
 } from "reactstrap";
-import { Link } from "react-router-dom";
-import { useApiClient } from "../../hooks/useApiClient";
+import { Link, useHistory } from "react-router-dom";
+
+import { Bullseye } from "../../components/Bullseye";
+import { FC } from "react";
+import { Toolbar } from '../../components/Toolbar'
 import { Tour } from "../../api/types";
 import { ToursList } from "./ToursList";
-import { Bullseye } from "../../components/Bullseye";
+import { useApiClient } from "../../hooks/useApiClient";
+import { useQuery } from 'react-query'
 
 export const Tours: FC<{}> = () => {
   const apiClient = useApiClient();
-  const [isLoading, setIsLoading] = useState(true);
-  const [tours, setTours] = useState<Tour[]>([]);
+  const { data: tours, isLoading } = useQuery('tours', () => apiClient.getTours())
+  const history = useHistory()
 
-  useEffect(() => {
-    apiClient
-      .getTours()
-      .then(setTours)
-      .then(() => {
-        setIsLoading(false);
-      });
-  }, [apiClient]);
+  const handleAddTour = () => {
+    history.push('/tours/add')
+  }
 
   return (
     <>
       <Breadcrumb>
         <BreadcrumbItem active>Экскурсии</BreadcrumbItem>
       </Breadcrumb>
+      <Toolbar>
+        <Button disabled={isLoading} onClick={handleAddTour}>Добавить экскурсию</Button>
+      </Toolbar>
+      <hr />
       {isLoading && (
         <Bullseye>
           <Spinner />
         </Bullseye>
       )}
-      {!isLoading && tours.length === 0 && (
+      {!isLoading && (tours as Tour[]).length === 0 && (
         <Jumbotron>
           <h1>Создайте свою первую экскурсию на портале Наш Урал</h1>
           <p>Комплектуйте горячие туры аудиторией с Нашего Урала</p>
@@ -45,7 +47,7 @@ export const Tours: FC<{}> = () => {
           </Button>
         </Jumbotron>
       )}
-      {!isLoading && tours.length !== 0 && <ToursList tours={tours} />}
+      {!isLoading && (tours as Tour[]).length !== 0 && <ToursList tours={tours as Tour[]} />}
     </>
   );
 };
